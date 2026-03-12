@@ -66,11 +66,25 @@ def check_headers(url):
 
 if __name__ == "__main__":
     import argparse
+    import csv
+    import io
     
     parser = argparse.ArgumentParser(description="PenMate - Web Application Security Recon Tool")
     parser.add_argument("url", help="Target URL to scan")
+    parser.add_argument("--output", choices=["json", "csv"], default="text", help="Output format: json, csv, or text")
     args = parser.parse_args()
-    
+    print(f"Output format: {args.output}")
     results = check_headers(args.url)
-    for r in results:
-        print(r)
+
+    if args.output == "json":
+        print(json.dumps(results, indent=2))
+    elif args.output == "csv":
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=["header", "status", "severity", "value"])
+        writer.writeheader()
+        writer.writerows(results)
+        print(output.getvalue())
+
+    else:
+        for r in results:
+            print(r)
